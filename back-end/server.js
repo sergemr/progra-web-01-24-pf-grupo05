@@ -2,11 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const port = 3008;
-
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const secretKey = "1234";
-
 const { Sequelize, DataTypes } = require("sequelize");
 app.use(cors());
 // Express middleware for parsing JSON
@@ -77,10 +72,35 @@ const libroSchema = {
     allowNull: false,
     unique: false,
   },
+  cantidad_disponible: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: false,
+  },
 };
+  const apartadosSchema = {
+    libro_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    nombre_libro: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: false,
+    },
+    nombre_usuario: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: false,
+    },
+};
+
 // Create User entity using the schema
 const User = new Entity("User", userSchema);
 const Libro = new Entity("Libro", libroSchema);
+const Apartado = new Entity("Apartado", apartadosSchema);
 // Synchronize the database with the defined models.
 // This will create the tables if they do not exist
 // It will also create the tables with the defined schema
@@ -91,6 +111,7 @@ const syncronizeDB = () => {
     .then(async () => {
       await User.sync();
       await Libro.sync();
+      await Apartado.sync();
     })
     .catch((error) => {
       console.error("Error synchronizing database:", error);
@@ -111,26 +132,11 @@ app.post("/login", async (req, res) => {
     const user = await User.model.findOne({
       where: {
         user_email: user_email,
+        user_password: user_password,
       },
     });
-
-    const isValidPassword = await bcrypt.compare(
-      user_password,
-      user.user_password
-    );
-
-    // Define token expiration time (e.g., 1 hour)
-    const expirationTime = 300; // in seconds
-
-    // Generate JWT token with expiration time
-    const token = jwt.sign(
-      { userId: user.user_id, timeIssued: Date.now() }, // payload
-      secretKey,
-      { expiresIn: expirationTime } // options
-    );
-
-    if (user && isValidPassword) {
-      res.status(200).json({ message: "Login successful", user, token });
+    if (user) {
+      res.status(200).json({ message: "Login successful", user });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
     }
@@ -144,13 +150,11 @@ app.post("/register", async (req, res) => {
     const { user_email, user_name, user_last_name, user_password } = req.body;
     console.log("req.body");
     console.log(req.body);
-
-    const hassPassword = await bcrypt.hash(user_password, 10);
     const user = await User.model.create({
       user_email,
       user_name,
       user_last_name,
-      user_password: hassPassword,
+      user_password,
     });
     res.status(201).json({ message: "User created", user });
   } catch (error) {
@@ -158,8 +162,6 @@ app.post("/register", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
 
 app.get("/users", async (req, res) => {
   try {
@@ -236,12 +238,12 @@ app.delete("/libros/:libro_id", async (req, res) => {
 app.put("/libros/:libro_id", async (req, res) => {
   try {
     const { libro_id } = req.params;
-    const { nombre_autor, nombre_libro } = req.body;
+    const { nombre_autor, nombre_libro, cantidad_disponible } = req.body;
     await Libro.model.update(
       {
         nombre_autor,
         nombre_libro,
-        
+        cantidad_disponible,
       },
       {
         where: {
@@ -258,12 +260,13 @@ app.put("/libros/:libro_id", async (req, res) => {
 
 app.post("/registroLibro", async (req, res) => {
   try {
-    const { nombre_autor, nombre_libro } = req.body;
+    const { nombre_autor, nombre_libro, cantidad_disponible } = req.body;
     console.log("req.body");
     console.log(req.body);
     const libro = await Libro.model.create({
       nombre_autor,
       nombre_libro,
+      cantidad_disponible
     });
     res.status(201).json({ message: "Libro created", libro });
   } catch (error) {
@@ -273,6 +276,86 @@ app.post("/registroLibro", async (req, res) => {
 });
 
 
+app.post("/reservaLibro", async (req, res) => {
+  try {
+    const { nombre_libro, nombre_usuario } = req.body;
+    console.log("req.body");
+    console.log(req.body);
+    const Apartado = await Apartado.model.create({
+      nombre_libro,
+      nombre_usuario,
+    });
+    res.status(201).json({ message: "Reserva created", Apartado });
+  } catch (error) {
+    console.error("Error creating Reserva:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
+});
+// Crear una reserva de libro
+app.post("/reservaLibros", async (req, res) => {
+  try {
+    const { nombre_libro, nombre_usuario } = req.body;
+    const nuevaReserva = await Apartado.model.create({
+      libroNombre: nombre_libro,
+      userName: nombre_usuario,
+    });
+    res.status(201).json({ message: "Reserva realizada", reserva: nuevaReserva });
+  } catch (error) {
+    console.error("Error realizando reserva:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Obtener todas las reservas de libros
+app.get("/reservaLibros", async (req, res) => {
+  try {
+    const reservas = await Apartado.model.findAll();
+    res.status(200).json(reservas);
+  } catch (error) {
+    console.error("Error obteniendo reservas de libros:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Eliminar una reserva de libro por ID
+app.delete("/reservaLibros/:reserva_id", async (req, res) => {
+  try {
+    const { reserva_id } = req.params;
+    await Apartado.model.destroy({
+      where: {
+        apartado_id: reserva_id,
+      },
+    });
+    res.status(204).json({ message: "Reserva de libro eliminada" });
+  } catch (error) {
+    console.error("Error eliminando reserva de libro:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Actualizar una reserva de libro por ID
+app.put("/reservaLibros/:reserva_id", async (req, res) => {
+  try {
+    const { reserva_id } = req.params;
+    const { nombre_libro, nombre_usuario } = req.body;
+    await Apartado.model.update(
+      {
+        libroNombre: nombre_libro,
+        userName: nombre_usuario,
+      },
+      {
+        where: {
+          apartado_id: reserva_id,
+        },
+      }
+    );
+    res.status(204).json({ message: "Reserva de libro actualizada" });
+  } catch (error) {
+    console.error("Error actualizando reserva de libro:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });

@@ -8,6 +8,7 @@ const Libro = ({ libro, refreshData }) => {
   const [libroId, setlibroId] = useState(libro.libro_id);
   const [nombreLibro, setNombreLibro] = useState(libro.nombre_libro);
   const [nombreAutor, setNombreAutor] = useState(libro.nombre_autor);
+  const [cantidadDisponible, setCantidadDisponible] = useState(libro.cantidad_disponible);
   const deleteLibro = async (libro_id) => {
     console.log("deleteLibro");
     try {
@@ -25,6 +26,7 @@ const Libro = ({ libro, refreshData }) => {
       await axios.put(`http://localhost:3008/libros/${libroId}`, {
         nombre_autor: nombreAutor,
         nombre_libro: nombreLibro,
+        cantidad_disponible: cantidadDisponible,
 
       });
       refreshData();
@@ -36,7 +38,7 @@ const Libro = ({ libro, refreshData }) => {
 
   return (
     <div className={styles.Libro} data-testid="Libro">
-      Libro: {libro.nombre_libro} - {libro.nombre_autor}
+      Libro: {libro.nombre_libro} - {libro.nombre_autor} - {libro.cantidad_disponible}
       <button onClick={() => deleteLibro(libro.libro_id)}>Eliminar</button>
       <button onClick={() => setEdit(!edit)}>Edit</button>
       <div style={{ display: edit ? "block" : "none" }}>
@@ -62,7 +64,17 @@ const Libro = ({ libro, refreshData }) => {
             />
           </label>
           <br />
+          <label>
+            Cantidad Disponible:
+            <input
+              type="text"
+              value={cantidadDisponible}
+              onChange={(e) => setCantidadDisponible(e.target.value)}
+              required
+            />
+          </label>
           <br />
+          
           <button type="submit">Update</button>
         </form>{" "}
         <hr />

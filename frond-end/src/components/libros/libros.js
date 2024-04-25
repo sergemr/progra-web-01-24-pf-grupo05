@@ -1,89 +1,117 @@
 import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import styles from "./libros.module.css";
 import axios from "axios";
+import styles from "./libros.module.css";
 import { useNavigate } from "react-router-dom";
-import Libro from "../libro/libro";
-import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-
+import {
+  Grid,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  AppBar,
+  Toolbar,  
+  Card
+} from "@mui/material";
+import Navbar from "../Navbar/Navbar";
 
 const Libros = () => {
   const [libros, setLibros] = useState([]);
-
-  const handleRefresh = () => {
-    window.location.reload();
-  };
+  const [filtro, setFiltro] = useState('');
   const navigate = useNavigate();
+
   const fetchLibros = async () => {
-    console.log("fetchLibros");
     try {
       const response = await axios.get("http://localhost:3008/libros", {
-        headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`,
-        },
+
       });
       setLibros(response.data);
     } catch (e) {
       console.error("Error fetching libros:", e);
     }
   };
+
   useEffect(() => {
     fetchLibros();
   }, []);
 
   const handleFilter = (e) => {
-    const { value } = e.target;
-    const filteredLibros = libros.filter((libro) => {
-      return libro.nombre_libro.toLowerCase().includes(value.toLowerCase());
-    });
-    setLibros(filteredLibros);
+    setFiltro(e.target.value);
   };
+
+  const handleEdit = (libro_id) => {
+    navigate(`/editarLibro/${libro_id}`);
+  };
+
+  const handleDelete = async (libro_id) => {
+    try {
+      await axios.delete(`http://localhost:3008/libros/${libro_id}`);
+      setLibros(libros.filter((libro) => libro.libro_id !== libro_id));
+    } catch (e) {
+      console.error("Error deleting libro:", e);
+    }
+  };
+
+  const filteredLibros = libros.filter((libro) =>
+    libro.nombre_libro.toLowerCase().includes(filtro.toLowerCase())
+  );
+
   return (
     <div className={styles.Libros} data-testid="Libros">
-      <a href="/home">Home</a>
-      <br />
-      <br />
-      Libros Registrados: &nbsp;
-      {libros.length}
-      <br />
-      <br />
-      <Grid container>
-        <Grid spacing={2} item xs={12}>
+      <Navbar />
+      <Card>
+    <Box sx={{ marginTop: 4 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
           <TextField
-            id="outlined-basic"
-            onChange={handleFilter}
+            fullWidth
+            id="search"
             label="Filtro por Nombre"
             variant="outlined"
+            onChange={handleFilter}
           />
         </Grid>
-        <hr />
       </Grid>
-      <Grid container>
-        {libros.map((libro, index) => (
-          <Grid item xs={12} md={6} lg={4}>
-            <Libro libro={libro} refreshData={fetchLibros} />
-          </Grid>
-        ))}
-
-        {libros.forEach((libro) => {
-          console.log("libro: forEach", libro);
-        })}
-      </Grid>
-      <br />
-      <br />
-
-      <Button onClick={handleRefresh} variant="contained">
-        Refrescar
-      </Button>
-      <ul></ul>
+      <TableContainer component={Paper} sx={{ marginTop: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Título</TableCell>
+              <TableCell>Autor</TableCell>
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredLibros.map((libro) => (
+              <TableRow key={libro.libro_id}>
+                <TableCell>{libro.nombre_libro}</TableCell>
+                <TableCell>{libro.nombre_autor}</TableCell>
+                <TableCell>{libro.cantidad_disponible}</TableCell>
+                <TableCell>
+                  {/* Aquí irían tus botones de editar y eliminar */}
+                  <Box sx={{ display: 'flex', gap: 2.5 }}>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => handleDelete(libro.libro_id)}>
+                        Eliminar
+                      </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+    </Card>
     </div>
   );
 };
-
-Libros.propTypes = {};
-
-Libros.defaultProps = {};
 
 export default Libros;

@@ -36,60 +36,60 @@ const Registro = () => {
      }
    };
    return (
-     <div className={styles.Login} data-testid="Login">
-       <Card sx={{ maxWidth: 375, margin: "auto" }}>
-         <CardContent>
-           <h1>Register</h1>
-           <TextField
-             id="outlined-basic"
-             onChange={(e) => {
-               setUserEmail(e.target.value);
-             }}
-             label="correo electronico"
-             variant="outlined"
-           />
-           <br />
-           <br />
-           <TextField
-             id="outlined-basic"
-             onChange={(e) => {
-               setUserName(e.target.value);
-             }}
-             label="nombre "
-             variant="outlined"
-           />
-           <br />
-           <br />
-           <TextField
-             id="outlined-basic"
-             onChange={(e) => {
-               setUserLastName(e.target.value);
-             }}
-             label="apellido"
-             variant="outlined"
-           />
-           <br />
-           <br />
-           <TextField
-             id="outlined-basic"
-             label="password"
-             onChange={(e) => {
-               setUserPassword(e.target.value);
-             }}
-             type="password"
-             variant="outlined"
-           />
- 
-           <br />
-           <br />
-           <Button onClick={handleSumbit} variant="contained">
-             Registro
-           </Button>
-         </CardContent>
-       </Card>
-     </div>
-   );
- };
+    <div className={styles.Registro} data-testid="Registro">
+      <Card sx={{ maxWidth: 380, margin: "auto" }}>
+        <CardContent style={{ color:'black' }} >
+          <h1>Register</h1>
+          <TextField
+            id="outlined-basic"
+            onChange={(e) => {
+              setUserEmail(e.target.value);
+            }}
+            label="correo electronico" style={{backgroundColor: 'white', color: 'white'}} 
+            variant="outlined"
+          />
+          <br />
+          <br />
+          <TextField
+            id="outlined-basic"
+            onChange={(e) => {
+              setUserName(e.target.value);
+            }}
+            label="nombre "style={{backgroundColor: 'white', color: 'white'}} 
+            variant="outlined"
+          />
+          <br />
+          <br />
+          <TextField
+            id="outlined-basic"
+            onChange={(e) => {
+              setUserLastName(e.target.value);
+            }}
+            label="apellido"style={{backgroundColor: 'white', color: 'white'}} 
+            variant="outlined"
+          />
+          <br />
+          <br />
+          <TextField
+            id="outlined-basic"
+            label="password"
+            onChange={(e) => {
+              setUserPassword(e.target.value);
+            }}
+            type="password" style={{backgroundColor: 'white', color: 'white'}} 
+            variant="outlined"
+          />
+
+          <br />
+          <br />
+          <Button onClick={handleSumbit} variant="contained" style={{backgroundColor: 'green', color: 'white'}} >
+            Registro
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 Registro.propTypes = {};
 

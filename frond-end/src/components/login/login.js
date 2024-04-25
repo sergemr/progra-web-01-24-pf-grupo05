@@ -25,54 +25,55 @@ const Login = () => {
        console.log(response);
        localStorage.setItem("user", JSON.stringify(response.data.user));
        localStorage.setItem("token", JSON.stringify(response.data.token));
-       navigate("/home");
+       navigate("/libros");
      } catch (e) {
        alert("Invalid credentials");
      }
    };
  
    return (
-     <div className={styles.Login} data-testid="Login">
-       <Card sx={{ maxWidth: 375, margin: "auto" }}>
-         <CardContent>
-           <h1>Login</h1>
-           <TextField
-             id="outlined-basic"
-             onChange={(e) => {
-               setUser(e.target.value);
-             }}
-             label="usuario"
-             variant="outlined"
-           />
-           <br />
-           <br />
-           <TextField
-             id="outlined-basic"
-             label="password"
-             onChange={(e) => {
-               setPassword(e.target.value);
-             }}
-             type="password"
-             variant="outlined"
-           />
-           <br />
-           <br />
-           <div>Crear cuenta</div>
-            &nbsp; &nbsp;
-            <a href="/registro">Registro</a>
-           <br />
-           <br />
-           <Button onClick={handleSumbit} variant="contained">
-             Contained
-           </Button>
-         </CardContent>
-       </Card>
-     </div>
-   );
- };
+    <div className={styles.Login} data-testid="Login">
+      <Card sx={{ maxWidth: 380, margin: "auto" }} >
+        <CardContent style={{ color:'black'}}  >
+          <h1>Login </h1>
+          <TextField 
+            id="outlined-basic"
+            onChange={(e) => {
+              setUser(e.target.value);
+            }}
+            label="usuario" style={{backgroundColor: 'white', color: 'white'}} 
+            variant="outlined"
+          />
+          <br />
+          <br />
+          <TextField
+            id="outlined-basic"
+            label="password"
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            type="password" style={{backgroundColor: 'white', color: 'white'}} 
+            variant="outlined"
+          />
+          <br />
+          <br />
+          <div>Crear cuenta</div>
+           &nbsp; &nbsp;
+           <a href="/registro">Registro</a>
+          <br />
+          <br />
+          <Button onClick={handleSumbit} variant="contained" style={{backgroundColor: 'green', color: 'white'}} >
+            Login 
+          </Button> 
+        </CardContent> 
+      </Card>
+    </div>
+  );
+};
  
  Login.propTypes = {};
  
  Login.defaultProps = {};
  
  export default Login;
+ 
